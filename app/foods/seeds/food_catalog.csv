@@ -1,0 +1,24 @@
+food_name,diet,source
+banana,vegan,static
+apple,vegan,static
+lentil soup,vegan,static
+falafel,vegan,static
+tofu,vegan,static
+hummus,vegan,static
+avocado toast,vegan,static
+veggie burger,vegan,static
+greek salad,vegetarian,static
+margherita pizza,vegetarian,static
+caprese salad,vegetarian,static
+paneer tikka,vegetarian,static
+cheese omelette,vegetarian,static
+mac and cheese,vegetarian,static
+butter paneer,vegetarian,static
+sushi,omnivore,static
+grilled chicken,omnivore,static
+steak,omnivore,static
+bolognese pasta,omnivore,static
+tuna salad,omnivore,static
+fish and chips,omnivore,static
+cheeseburger,omnivore,static
+pepperoni pizza,omnivore,static

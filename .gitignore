@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+.python-version
+.pytest_cache/
+
+# Env
+.env
+.venv/
+env/
+venv/
+
+# Editors/OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Ruff
+.ruff_cache
+
+# Logs
+*.log
+
+# Django
+migrations/
+
+# CI / coverage
+.cache/

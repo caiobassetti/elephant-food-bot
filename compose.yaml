@@ -1,0 +1,44 @@
+version: "3.9"
+
+name: elephants-food-bot
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: efb_db
+    environment: # Hard-coded for dev
+      POSTGRES_DB: efb
+      POSTGRES_USER: efb_user
+      POSTGRES_PASSWORD: efb_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U efb_user -d efb"]
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    container_name: efb_web
+    command: ["/app/docker/entrypoint.sh"]
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DATABASE_URL: postgresql://efb_user:efb_pass@db:5432/efb
+      DJANGO_DEBUG: "1"
+      DJANGO_SECRET_KEY: "dev-not-secret"
+      DRY_RUN: "1"
+      MAX_SIM_COST_USD: "2.00"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  pg_data:
