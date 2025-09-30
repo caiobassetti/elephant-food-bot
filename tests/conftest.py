@@ -87,7 +87,7 @@ def mock_openai_client(monkeypatch):
         def classify_food_diet(self, food_name):
             return None
 
-    module_path = "app.foods.utils.openai_client"
+    module_path = "foods.utils.openai_client"
     attr = "OpenAIClient"
     module = __import__(module_path, fromlist=[attr])
     monkeypatch.setattr(module, attr, _TestOpenAIClient, raising=True)
