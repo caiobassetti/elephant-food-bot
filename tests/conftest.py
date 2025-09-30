@@ -32,10 +32,6 @@ sys.path.insert(0, str(DJANGO_APP_DIR))
 # Ensure DJANGO_SETTINGS_MODULE is set
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 
-# 5) (Optional) quick sanity: uncomment if you need to debug
-print(">>> USING DJANGO_APP_DIR:", DJANGO_APP_DIR)
-print(">>> sys.path[0]:", sys.path[0])
-
 import uuid
 from contextlib import contextmanager
 
