@@ -28,9 +28,10 @@ jobs:
           python -m ruff --version
           python -m ruff check .
 
-      - name: Run tests (pytest)
+      - name: Run tests (pytest from app dir)
+        working-directory: app
         env:
-          DJANGO_SETTINGS_MODULE: config.settings.dev # Ensure tests run with dev settings
-          DRY_RUN: "1" # Force DRY_RUN in CI
+          DJANGO_SETTINGS_MODULE: config.settings.dev
+          DRY_RUN: "1"
         run: |
-          python -m pytest -q
+          python -m pytest ../tests -q
