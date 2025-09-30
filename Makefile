@@ -13,10 +13,10 @@ shell:
 	docker compose exec web bash
 
 migrate:
-	docker compose exec web python /app/app/manage.py migrate
+	docker compose exec web python app/manage.py migrate
 
 test:
 	docker compose exec web pytest -q
 
 lint:
-	docker compose exec web ruff check app
+	docker compose exec web ruff check .

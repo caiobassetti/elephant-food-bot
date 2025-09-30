@@ -3,12 +3,18 @@ import uuid
 import structlog
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-
-from foods.models import UserProfile, Conversation, FavoriteFood, FoodCatalog, DietLabel, MessageRole
+from foods.models import (
+    Conversation,
+    DietLabel,
+    FavoriteFood,
+    FoodCatalog,
+    MessageRole,
+    UserProfile,
+)
 from foods.services import catalog
 from foods.services.diet import derive_user_diet
 from foods.utils.normalize import normalize_food_name
-from foods.utils.openai_client import OpenAIClient, OPENAI_MODEL
+from foods.utils.openai_client import OPENAI_MODEL, OpenAIClient
 
 log = structlog.get_logger(__name__)
 
@@ -74,7 +80,7 @@ class Command(BaseCommand):
                 user = UserProfile.objects.create(diet=DietLabel.UNKNOWN, run_id=run_uuid)
 
                 # Store A's question
-                conv_a = Conversation.objects.create(
+                Conversation.objects.create(
                     user=user,
                     role=MessageRole.A,
                     prompt=A_QUESTION,

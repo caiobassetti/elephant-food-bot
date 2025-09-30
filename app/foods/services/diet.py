@@ -1,5 +1,6 @@
 from foods.models import DietLabel
 
+
 def derive_user_diet(food_diets):
     """
     Derive the user's diet.

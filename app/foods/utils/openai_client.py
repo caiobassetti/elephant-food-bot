@@ -1,4 +1,6 @@
-import os, time
+import os
+import time
+
 import structlog
 
 log = structlog.get_logger(__name__)

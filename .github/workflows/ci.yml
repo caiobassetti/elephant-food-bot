@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Lint (ruff)
+        run: |
+          python -m ruff --version
+          python -m ruff check .
+
+      - name: Run tests (pytest)
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.dev # Ensure tests run with dev settings
+          DRY_RUN: "1" # Force DRY_RUN in CI
+        run: |
+          python -m pytest -q

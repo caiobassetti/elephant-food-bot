@@ -2,11 +2,10 @@ import csv
 import os
 
 import structlog
-from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.utils import DataError, IntegrityError
-
-from foods.models import FoodCatalog, DietLabel
+from foods.models import DietLabel, FoodCatalog
 from foods.utils.normalize import normalize_food_name
 from foods.utils.openai_client import OpenAIClient
 

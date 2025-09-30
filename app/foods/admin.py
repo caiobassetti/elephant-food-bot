@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UserProfile, Conversation, FavoriteFood, FoodCatalog
+from .models import Conversation, FavoriteFood, FoodCatalog, UserProfile
 
 
 @admin.register(UserProfile)

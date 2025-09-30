@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+
 class VegUserSerializer(serializers.Serializer):
     user_id = serializers.UUIDField()
     run_id = serializers.UUIDField()

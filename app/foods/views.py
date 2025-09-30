@@ -1,10 +1,11 @@
 from django.db.models import Prefetch
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import UserProfile, FavoriteFood, DietLabel
+from .models import DietLabel, FavoriteFood, UserProfile
 from .serializers import VegUserSerializer
+
 
 class VegUsersView(APIView):
     permission_classes = [IsAuthenticated]
