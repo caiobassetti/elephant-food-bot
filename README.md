@@ -1,4 +1,4 @@
-# Elephants Food Bot — Django + DRF
+# Elephants Food Bot — Django + DRF ![CI](https://github.com/caiobassetti/elephant-food-bot/actions/workflows/ci.yml/badge.svg)
 
 A Dockerized Django service that simulates 100 “A asks → B answers top-3 foods” chats, stores results in SQL, and exposes an **authenticated** API that lists vegetarian/vegan users with their top-3 foods.
 
@@ -14,14 +14,21 @@ A Dockerized Django service that simulates 100 “A asks → B answers top-3 foo
 
 ```mermaid
 flowchart LR
-    Dev[You / CI] -->|docker compose up| Web[Web (Django+DRF)]
-    Web -->|ORM| DB[Dev(Postgres) / Prod (SQLite)]
-    Cmd[app/manage.py simulate_foods] --> Web
-    Web -->|/api/veg-users/ | Client[curl / browser]
-    Auth
-      Client -->|Basic| Web
-      Client -->|Token| Web
-    end
+  Dev[Dev / CI]
+  Web[Web (Django + DRF)]
+  DB[(Postgres)]
+  Cmd[manage.py simulate_foods]
+  Client[Client (curl / browser)]
+
+  Dev -->|docker compose up| Web
+  Cmd -->|generate & persist| Web
+  Client -->|HTTP GET /api/veg-users/| Web
+  Web -->|ORM / SQL| DB
+
+  subgraph Auth
+    Client -->|Basic| Web
+    Client -->|Token| Web
+  end
 ```
 
 
