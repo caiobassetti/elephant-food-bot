@@ -1,15 +1,12 @@
-import uuid
 
 import pytest
-from django.apps import apps
 from django.core.management import call_command
-
 from foods.models import (
-    DietLabel,
-    FoodCatalog,
     Conversation,
-    UserProfile,
+    DietLabel,
     FavoriteFood,
+    FoodCatalog,
+    UserProfile,
 )
 
 pytestmark = pytest.mark.django_db  # Allows DB access
