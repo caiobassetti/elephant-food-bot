@@ -44,7 +44,7 @@ class FoodCatalog(models.Model):
 
 class UserProfile(models.Model):
     """
-    Generated "user" for the B-side of a conversation run.
+    Generated "user" for the B-side of a conversation run,
     Diet is set after evaluating the top-3 foods in a run.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

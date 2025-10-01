@@ -5,18 +5,17 @@ import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.utils import DataError, IntegrityError
+
 from foods.models import DietLabel, FoodCatalog
-from foods.utils.normalize import normalize_food_name
-from foods.utils.openai_client import OpenAIClient
+from foods.normalize import normalize_food_name
+from foods.openai_client import OpenAIClient
 
 log = structlog.get_logger(__name__)
 
-SEED_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "seeds", "food_catalog.csv")
+SEED_PATH = os.path.join(os.path.dirname(__file__), "seeds", "food_catalog.csv")
 
+# Returns cleaned data or raise ValidationError
 def _validate_catalog_row(row):
-    """
-    Returns cleaned data or raise ValidationError.
-    """
     errors = {}
     cleaned = {}
 
@@ -47,10 +46,8 @@ def _validate_catalog_row(row):
 
     return cleaned
 
+# Load the seed CSV
 def ensure_seed_loaded():
-    """
-    Load the seed CSV and returns number of inserts performed.
-    """
     if not os.path.exists(SEED_PATH):
         log.warning("catalog.seed_missing", path=SEED_PATH)
         return 0
@@ -58,8 +55,6 @@ def ensure_seed_loaded():
     inserts = 0
     with open(SEED_PATH, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        # Ensures one DB transaction for the entire catalog,
-        # either fully created or rolled back in case of error at any point
         with transaction.atomic():
             for row_num, row in enumerate(reader, start=2):
                 try:
@@ -70,16 +65,19 @@ def ensure_seed_loaded():
                     )
                     inserts += int(created)
 
-                except ValidationError as ve: # Column-level info
+                except ValidationError as ve:
+                    # Column-level info
                     log.error(
                         "catalog.seed_row_invalid",
                         row_num=row_num,
                         errors=getattr(ve, "message_dict", {"__all__": ve.messages}),
                         row=row,
                     )
-                    raise # Re-raise to trigger rollback of the whole file
+                    # Re-raise to trigger rollback of the whole file
+                    raise
 
-                except (DataError, IntegrityError) as dbx: # DB-layer issues
+                except (DataError, IntegrityError) as dbx:
+                    # DB-layer issues
                     log.error(
                         "catalog.seed_row_db_error",
                         row_num=row_num,
@@ -99,10 +97,8 @@ def lookup(food_name):
     except FoodCatalog.DoesNotExist:
         return None
 
+# If not in catalog, ask LLM
 def expand_with_llm(food_name, client = None):
-    """
-    If not in catalog, ask LLM, persist result in db
-    """
     norm = normalize_food_name(food_name)
     if client is None:
         client = OpenAIClient()
@@ -115,5 +111,6 @@ def expand_with_llm(food_name, client = None):
         food_name=norm,
         defaults={"diet": label, "source": "llm", "confidence": None}
     )
-    log.info("catalog.llm_cached", food=norm, diet=label, cost_usd=round(client.usage.cost_usd, 6))
+
+    log.info("catalog.llm_cached", food=norm, diet=label, cost_usd=round(client.cost_usd(), 6))
     return obj

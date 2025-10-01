@@ -1,16 +1,18 @@
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+
+[tool.ruff.lint]
 select = [
   "E", "F",  # pycodestyle + pyflakes
   "I",       # isort
   "UP",      # pyupgrade
   "B",       # bugbear
 ]
+
 ignore = [
+  "E402",
   "E501",    # line length
-  "F401",
-  "F403",
 ]
 
 [tool.ruff.lint.isort]
@@ -18,4 +20,5 @@ known-first-party = ["app", "config"]
 combine-as-imports = true
 
 [tool.ruff.lint.per-file-ignores]
+"app/config/settings/*.py" = ["F401", "F403"]
 "tests/conftest.py" = ["E402"]

@@ -4,16 +4,13 @@ from urllib.parse import urlparse
 
 from common.logging import configure_logging
 
-BASE_DIR = Path(__file__).resolve().parents[2]  # /app/app
-
-# Spend Safe
-DRY_RUN = os.getenv("DRY_RUN", "1") == "1"
-MAX_SIM_COST_USD = float(os.getenv("MAX_SIM_COST_USD", "2.0"))
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 # Core Django
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-not-secret")
 DEBUG = False
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INSTALLED_APPS = [
     "django.contrib.admin",

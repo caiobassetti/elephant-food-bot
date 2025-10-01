@@ -14,7 +14,7 @@ for mp in REPO_ROOT.rglob("manage.py"):
     if (candidate / "config").is_dir():
         DJANGO_APP_DIR = candidate
         break
-# If there's no manage.py with a sibling 'config', try any 'config'
+
 if DJANGO_APP_DIR is None:
     for cfg in REPO_ROOT.rglob("config/__init__.py"):
         DJANGO_APP_DIR = cfg.parent.parent
@@ -49,15 +49,13 @@ except Exception:
 
 @pytest.fixture(scope="session", autouse=True)
 def _force_sqlite_db():
-    # Override DATABASES to use an in-memory sqlite DB for tests
-    # This avoids depending on Postgres in CI, without touching dev/prod settings
+    # Override DATABASES to use sqlite DB for tests
     settings.DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
         "ATOMIC_REQUESTS": False,
     }
     # Ensure connections pick up modified settings
-    # in case any DB connection was already opened
     for alias in connections:
         try:
             connections[alias].close()
@@ -65,41 +63,13 @@ def _force_sqlite_db():
             pass
     yield
 
-@pytest.fixture(autouse=True)
-def _set_dry_run_env(monkeypatch):
-    # Ensure DRY_RUN=1 in all tests
-    monkeypatch.setenv("DRY_RUN", "1")
-    yield
-
-@pytest.fixture(autouse=True)
-def mock_openai_client(monkeypatch):
-    # Replace app.foods.utils.openai_client.OpenAIClient with a safe test double
-    class _TestOpenAIClient:
-        def __init__(self, dry_run=None):
-            self.dry_run = True # Always act as dry-run in tests
-            self.input_tokens = 0
-            self.output_tokens = 0
-            self._client = None
-
-        def cost_usd(self):
-            return (self.input_tokens / 1000.0) * 0.0 + (self.output_tokens / 1000.0) * 0.0
-
-        def classify_food_diet(self, food_name):
-            return None
-
-    module_path = "foods.utils.openai_client"
-    attr = "OpenAIClient"
-    module = __import__(module_path, fromlist=[attr])
-    monkeypatch.setattr(module, attr, _TestOpenAIClient, raising=True)
-    monkeypatch.setenv("OPENAI_API_KEY", "test")
-    monkeypatch.setenv("OPENAI_MODEL", "gpt-test")
-    yield
 
 @pytest.fixture
 def api_client():
     if APIClient is not None:
         return APIClient()
     return Client()
+
 
 def _default_for_field(field):
     # Generate valid default per field type
@@ -131,8 +101,9 @@ def _default_for_field(field):
         return {}
     return None
 
+
 # Decorator allows it to be used with 'with _reentrancy_guard():'
-# to garantee cleanup even in case of exception
+# to guarantee cleanup even in case of exception
 @contextmanager
 def _reentrancy_guard(seen):
     # Ensures that seen is cleared no matter what (success or exception)
@@ -141,9 +112,9 @@ def _reentrancy_guard(seen):
     finally:
         seen.clear()
 
+# Keeps a seen set of models it is currently constructing
+# to prevent infinite recursion in cyclic relations (A -> B -> A).
 def build_instance(Model, **overrides):
-    # Keeps a seen set of models it is currently constructing
-    # to prevent infinite recursion in cyclic relations (A -> B -> A).
     seen = set()
 
     def _make(mdl):
@@ -156,18 +127,18 @@ def build_instance(Model, **overrides):
         seen.add(mdl)
 
         data = {}
-        for f in mdl._meta.get_fields(): # Inspects Model._meta.get_fields() and walks each field
+        for f in mdl._meta.get_fields():
             if f.auto_created and not f.concrete:
-                continue  # Skips reverse/auto-created relations
+                continue # Skips reverse/auto-created relations
             if getattr(f, "primary_key", False):
-                continue  # Skips primary keys
+                continue # Skips primary keys
             if f.name in overrides:
-                data[f.name] = overrides[f.name] # If an override was used (user=user), it uses that
-                continue
+                data[f.name] = overrides[f.name]
+                continue # If an override was used (user=user), it uses that
             if hasattr(f, "default") and f.default != models.NOT_PROVIDED:
                 continue # If a field has a default, it’s safe to skip
             if getattr(f, "null", False):
-                continue  # If a field is nullable, it’s safe to skip
+                continue # If a field is nullable, it’s safe to skip
             if isinstance(f, models.ForeignKey):
                 # For ForeignKey fields, it builds the related instance first and assigns it
                 rel = f.remote_field.model
@@ -175,7 +146,7 @@ def build_instance(Model, **overrides):
                 rel_inst.save()
                 data[f.name] = rel_inst
             else:
-                val = _default_for_field(f) # For scalar fields, it supplies an appropriated type
+                val = _default_for_field(f) # For scalar fields, it supplies an appropriate type
                 if val is not None:
                     data[f.name] = val
         inst = mdl(**data)
