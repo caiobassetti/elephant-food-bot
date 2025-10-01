@@ -67,9 +67,29 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+      - name: Ensure seed CSV exists
+        if: ${{ env.OPENAI_API_KEY != '' }}
+        run: |
+          mkdir -p app/seeds
+          if [ ! -f app/seeds/food_catalog.csv ]; then
+          cat > app/seeds/food_catalog.csv <<'CSV'
+          food_name,diet,source
+          margherita pizza,vegetarian,static
+          caprese salad,vegetarian,static
+          avocado toast,vegan,static
+          banana,vegan,static
+          hummus,vegan,static
+          CSV
+          fi
+
+      - name: Show migrations (foods)
+        if: ${{ env.OPENAI_API_KEY != '' }}
+        run: python app/manage.py showmigrations foods
+
       - name: Migrate (SQLite)
         if: ${{ env.OPENAI_API_KEY != '' }}
-        run: python app/manage.py migrate --noinput
+        run: |
+          python app/manage.py migrate --noinput --run-syncdb
 
       - name: Smoke run (3 conversations, real OpenAI)
         if: ${{ env.OPENAI_API_KEY != '' }}
