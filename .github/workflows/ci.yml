@@ -38,7 +38,7 @@ jobs:
 
   openai_smoke:
     runs-on: ubuntu-latest
-    needs: lint_and_test
+    needs: lint-and-test
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # safe: env can read secrets
