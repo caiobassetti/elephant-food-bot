@@ -21,6 +21,8 @@ flowchart LR
   Client["Client (curl / browser)"]
 
   Dev -->|docker compose up| Web
+  %% invisible alignment edge
+  Dev -.-> Web
   Cmd -->|generate & persist| Web
   Client -->|HTTP GET /api/veg-users/| Web
   Web -->|ORM / SQL| DB
@@ -29,9 +31,6 @@ flowchart LR
     Client -->|Basic| Web
     Client -->|Token| Web
   end
-
-  %% invisible alignment edge
-  Dev -.-> Web
 ```
 
 
