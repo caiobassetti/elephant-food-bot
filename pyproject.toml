@@ -5,7 +5,6 @@ target-version = "py312"
 [tool.ruff.lint]
 select = [
   "E", "F",  # pycodestyle + pyflakes
-  "I",       # isort
   "UP",      # pyupgrade
   "B",       # bugbear
 ]
