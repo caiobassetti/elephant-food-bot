@@ -17,6 +17,6 @@ fi
 echo "[entrypoint] Running migrations…"
 python /app/app/manage.py migrate --noinput
 
-echo "[entrypoint] Starting gunicorn (WSGI)…"
+echo "[entrypoint] Starting server…"
 exec python /app/app/manage.py runserver 0.0.0.0:8000
 # exec gunicorn config.wsgi:application --chdir /app/app --bind 0.0.0.0:8000 --workers 1 --timeout 60

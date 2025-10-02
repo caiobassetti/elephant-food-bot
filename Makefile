@@ -1,4 +1,8 @@
-.PHONY: up down logs shell migrate superuser token simulation test lint
+DOCKERHUB_USER ?= caiobassetti
+IMAGE_NAME ?= elephants-food-bot
+IMAGE_TAG ?= dev-0.1
+
+.PHONY: up down logs shell migrate superuser token simulation test lint docker-build-prod docker-push-prod
 
 up:
 	docker compose up --build -d
@@ -34,3 +38,9 @@ lint:
 smoke:
 	docker compose exec web python app/manage.py migrate --noinput
 	docker compose exec web python app/manage.py simulate_foods --runs=3
+
+docker-build-prod:
+	docker build -f docker/web.azure.Dockerfile -t $(DOCKERHUB_USER)/$(IMAGE_NAME):$(IMAGE_TAG) .
+
+docker-push-prod:
+	docker push $(DOCKERHUB_USER)/$(IMAGE_NAME):$(IMAGE_TAG)
