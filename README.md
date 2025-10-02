@@ -3,10 +3,10 @@
 A Dockerized Django service that simulates 100 “A asks → B answers top-3 foods” chats, stores results in SQL, and exposes an **authenticated** API that lists vegetarian/vegan users with their top-3 foods.
 
 > Stack: <br>
-> - Django, <br>
-> - DRF, <br>
-> - Postgres (local via Docker), <br>
-> - structured logs, <br>
+> - Django <br>
+> - DRF <br>
+> - Postgres (local via Docker) <br>
+> - structured logs <br>
 > - tests + CI <br>
 
 
@@ -81,6 +81,7 @@ GET `/api/veg-users/`
     - DB password: efb_pass
 
 ## Repo layout
+```
 .
 ├─ app/                        # Django app
 │  ├─ common/                  # Helpers package common to all domains
@@ -102,6 +103,7 @@ GET `/api/veg-users/`
 ├─ README.md
 ├─ requirements-dev.txt        # Dependencies for local dev
 └─ requirements.txt            # Dependencies for prod
+```
 
 
 ### Secrets
