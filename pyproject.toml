@@ -2,11 +2,6 @@
 line-length = 100
 target-version = "py312"
 
-per-file-ignores = {
-  "**/config/settings/dev.py" = ["F403", "F405"],
-  "**/config/settings/prod.py" = ["F403", "F405"],
-}
-
 [tool.ruff.lint]
 select = [
   "E", "F",  # pycodestyle + pyflakes
