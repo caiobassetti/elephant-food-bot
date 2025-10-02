@@ -29,6 +29,9 @@ flowchart LR
     Client -->|Basic| Web
     Client -->|Token| Web
   end
+
+  %% invisible alignment edge
+  Dev -.-> Web
 ```
 
 
