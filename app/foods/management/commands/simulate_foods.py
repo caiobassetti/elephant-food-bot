@@ -1,9 +1,9 @@
 import os
 import uuid
 
-import structlog
 from django.core.management.base import BaseCommand
 from django.db import transaction
+import structlog
 
 from foods import catalog
 from foods.diet import derive_user_diet
