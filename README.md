@@ -14,11 +14,11 @@ A Dockerized Django service that simulates 100 “A asks → B answers top-3 foo
 
 ```mermaid
 flowchart LR
-  Dev[Dev / CI]
-  Web[Web (Django + DRF)]
-  DB[(Postgres)]
-  Cmd[manage.py simulate_foods]
-  Client[Client (curl / browser)]
+  Dev["Dev / CI"]
+  Web["Web (Django + DRF)"]
+  DB["(Postgres)"]
+  Cmd["manage.py simulate_foods"]
+  Client["Client (curl / browser)"]
 
   Dev -->|docker compose up| Web
   Cmd -->|generate & persist| Web
