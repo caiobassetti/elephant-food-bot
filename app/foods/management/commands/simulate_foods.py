@@ -1,18 +1,13 @@
-import uuid
 import os
+import uuid
 
 import structlog
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
 from foods import catalog
 from foods.diet import derive_user_diet
-from foods.models import (
-    Conversation,
-    DietLabel,
-    FavoriteFood,
-    MessageRole,
-    UserProfile,
-)
+from foods.models import Conversation, DietLabel, FavoriteFood, MessageRole, UserProfile
 from foods.normalize import normalize_food_name
 from foods.openai_client import (
     OPENAI_MODEL,

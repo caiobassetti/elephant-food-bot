@@ -1,11 +1,12 @@
 from __future__ import annotations
-import os
-from django.http import JsonResponse
-from django.core.management import call_command
-from django.views.decorators.csrf import csrf_exempt
 
+import os
+
+from django.core.management import call_command
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAdminUser
 
 @csrf_exempt
