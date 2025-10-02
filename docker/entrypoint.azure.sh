@@ -23,7 +23,7 @@ if [[ -z "${EFB_LLM_CALL_BUDGET:-}" ]]; then
       ;;
     live)
       # larger cap once you're comfortable
-      export EFB_LLM_CALL_BUDGET=200
+      export EFB_LLM_CALL_BUDGET=500
       ;;
     *)
       # safest default when nothing specified

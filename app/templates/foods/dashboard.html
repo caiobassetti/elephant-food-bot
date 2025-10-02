@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elephants Food Bot Dashboard</title>
+    {% if request.GET.refresh %}
+    <meta http-equiv="refresh" content="3">
+    {% endif %}
+</head>
+<body>
+    <h1>Elephants Food Bot Dashboard</h1>
+
+    <div>
+        <form action="/ui/simulate" method="get">
+            <button name="count" value="10">Simulate 10</button>
+            <button name="count" value="50">Simulate 50</button>
+            <button name="count" value="100">Simulate 100</button>
+        </form>
+    </div>
+
+    <h2>Totals</h2>
+    <p>Total tokens: {{ totals.total_tokens }} | Total cost: ${{ totals.total_cost }}</p>
+
+    <h2>Filters</h2>
+    <form method="get">
+        Run ID: <input type="text" name="run_id" value="{{ filter_run_id }}">
+        Diet: <input type="text" name="diet" value="{{ filter_diet }}">
+        <button type="submit">Apply</button>
+    </form>
+
+    <h2>Diet Breakdown</h2>
+    <img src="/ui/diets.png?run_id={{ filter_run_id }}&diet={{ filter_diet }}" alt="Diet chart">
+
+    <h2>Results</h2>
+    <table border="1">
+        <tr>
+            <th>Run ID</th>
+            <th>User</th>
+            <th>Diet</th>
+            <th>Foods</th>
+            <th>Tokens</th>
+            <th>Cost</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+            <td>{{ r.run_id }}</td>
+            <td>{{ r.user_id }}</td>
+            <td>{{ r.diet }}</td>
+            <td>{{ r.foods|join:", " }}</td>
+            <td>{{ r.tokens }}</td>
+            <td>{{ r.cost }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

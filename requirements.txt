@@ -4,3 +4,4 @@ psycopg2-binary==2.9.9
 gunicorn==22.0.0
 structlog==24.1.0
 openai>=1.40.0
+matplotlib==3.9.2

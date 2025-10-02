@@ -5,4 +5,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("foods.urls")),
     path("", include("foods.urls_ops")),
+    path("ui/", include("foods.urls_ui")),
 ]
