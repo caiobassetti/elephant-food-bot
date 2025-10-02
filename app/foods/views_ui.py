@@ -5,7 +5,7 @@ from django.db.models import Count, Sum
 from django.http import HttpResponse
 import matplotlib.pyplot as plt
 
-from .models import UserProfile, FavoriteFood, Conversation, DietLabel
+from .models import UserProfile, Conversation
 
 def dashboard(request):
     run_id = request.GET.get("run_id")
