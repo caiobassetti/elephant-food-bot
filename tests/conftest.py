@@ -48,8 +48,8 @@ except Exception:
 
 
 @pytest.fixture(scope="session", autouse=True)
+# Override DATABASES to use sqlite DB for tests
 def _force_sqlite_db():
-    # Override DATABASES to use sqlite DB for tests
     settings.DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
@@ -129,16 +129,21 @@ def build_instance(Model, **overrides):
         data = {}
         for f in mdl._meta.get_fields():
             if f.auto_created and not f.concrete:
-                continue # Skips reverse/auto-created relations
+                # Skips reverse/auto-created relations
+                continue
             if getattr(f, "primary_key", False):
-                continue # Skips primary keys
+                # Skips primary keys
+                continue
             if f.name in overrides:
                 data[f.name] = overrides[f.name]
-                continue # If an override was used (user=user), it uses that
+                # If an override was used (user=user), it uses that
+                continue
             if hasattr(f, "default") and f.default != models.NOT_PROVIDED:
-                continue # If a field has a default, it’s safe to skip
+                # If a field has a default, it’s safe to skip
+                continue
             if getattr(f, "null", False):
-                continue # If a field is nullable, it’s safe to skip
+                # If a field is nullable, it’s safe to skip
+                continue
             if isinstance(f, models.ForeignKey):
                 # For ForeignKey fields, it builds the related instance first and assigns it
                 rel = f.remote_field.model
@@ -146,7 +151,8 @@ def build_instance(Model, **overrides):
                 rel_inst.save()
                 data[f.name] = rel_inst
             else:
-                val = _default_for_field(f) # For scalar fields, it supplies an appropriate type
+                # For scalar fields, it supplies an appropriate type
+                val = _default_for_field(f)
                 if val is not None:
                     data[f.name] = val
         inst = mdl(**data)

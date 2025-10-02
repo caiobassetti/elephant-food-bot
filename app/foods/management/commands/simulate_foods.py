@@ -160,7 +160,7 @@ class Command(BaseCommand):
         # Summarize token/cost for the whole run
         input_tokens = int(getattr(client, "input_tokens", 0) or 0)
         output_tokens = int(getattr(client, "output_tokens", 0) or 0)
-        total_cost = client.cost_usd()  # overall
+        total_cost = client.cost_usd()
         self.stdout.write(self.style.SUCCESS(
             f"Done. users={runs} run_id={run_uuid} "
             f"llm_input_tokens={input_tokens} "

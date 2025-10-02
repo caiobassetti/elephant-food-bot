@@ -6,7 +6,6 @@ from common.logging import configure_logging
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-# Core Django
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-not-secret")
 DEBUG = False
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")

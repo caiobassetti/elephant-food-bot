@@ -6,7 +6,8 @@ services:
   db:
     image: postgres:16-alpine
     container_name: efb_db
-    environment: # Hard-coded for dev
+    environment:
+      # Hard-coded for dev
       POSTGRES_DB: efb
       POSTGRES_USER: efb_user
       POSTGRES_PASSWORD: efb_pass

@@ -3,9 +3,9 @@ from django.apps import apps
 
 pytestmark = pytest.mark.django_db
 
+# Verifies the reverse related_names (messages, foods)
+# exist and pointto the created rows
 def test_related_names_exist_and_work():
-    # Verifies the reverse related_names (messages, foods)
-    # exist and actually point to the created rows
     UserProfile = apps.get_model("foods", "UserProfile")
     Conversation = apps.get_model("foods", "Conversation")
     FavoriteFood = apps.get_model("foods", "FavoriteFood")

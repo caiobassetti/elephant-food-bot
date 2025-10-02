@@ -73,7 +73,7 @@ def ensure_seed_loaded():
                         errors=getattr(ve, "message_dict", {"__all__": ve.messages}),
                         row=row,
                     )
-                    # Re-raise to trigger rollback of the whole file
+                    # Re-raise to trigger rollback
                     raise
 
                 except (DataError, IntegrityError) as dbx:

@@ -5,10 +5,6 @@ import structlog
 
 
 def configure_logging():
-    """
-    Example output:
-      {"event": "server_started", "level": "info", "timestamp": "..."}
-    """
     level = os.getenv("LOG_LEVEL", "INFO").upper()
     logging.basicConfig(level=level, format="%(message)s")
     structlog.configure(

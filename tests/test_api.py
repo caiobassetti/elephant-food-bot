@@ -4,7 +4,8 @@ import uuid
 import pytest
 from django.contrib.auth import get_user_model
 
-pytestmark = pytest.mark.django_db # Allows db access to the tests
+# Allows db access to the tests
+pytestmark = pytest.mark.django_db
 
 API_PATH = "/api/veg-users/"
 

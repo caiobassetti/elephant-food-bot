@@ -9,7 +9,8 @@ from foods.models import (
     UserProfile,
 )
 
-pytestmark = pytest.mark.django_db  # Allows DB access
+# Allows DB access
+pytestmark = pytest.mark.django_db
 
 # Ensure at least three rows exist so simulate_foods check passes
 def _seed_catalog_minimum():
@@ -109,14 +110,14 @@ def test_unknown_food_triggers_classification_tokens_in_B(monkeypatch):
         def cost_usd(self):
             return 0.0
 
+        # Top-3 call usage
         def ask_top_three_favorite_foods(self, prompt):
-            # Top-3 call usage
             self.input_tokens += 30
             self.output_tokens += 8
             return ["banana", "mystery stew", "avocado toast"]
 
+        # Classification usage for the unknown one
         def classify_food_diet(self, food_name):
-            # Classification usage for the unknown one
             assert food_name == "mystery stew"
             self.input_tokens += 20
             self.output_tokens += 6
@@ -153,7 +154,7 @@ def test_unknown_food_triggers_classification_tokens_in_B(monkeypatch):
     assert user.diet == DietLabel.OMNIVORE
 
 
-# Budget 1: top-3 succeeds, classification exceeds budget and raises
+# Top-3 succeeds, classification exceeds budget and raises
 # Transaction should roll back the user's creations for that run
 def test_budget_limiter_stops_run_and_rolls_back(monkeypatch):
     _seed_catalog_minimum()
