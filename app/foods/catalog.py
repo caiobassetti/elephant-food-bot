@@ -93,24 +93,32 @@ def ensure_seed_loaded():
 def lookup(food_name):
     norm = normalize_food_name(food_name)
     try:
-        return FoodCatalog.objects.get(food_name=norm)
+        obj = FoodCatalog.objects.get(food_name=norm)
+        log.info("classify.catalog_hit", food=norm, label=obj.diet)
+        return obj
     except FoodCatalog.DoesNotExist:
+        log.info("classify.catalog_miss", food=norm)
         return None
 
 # If not in catalog, ask LLM
-def expand_with_llm(food_name, client = None):
+def expand_with_llm(food_name, client=None):
     norm = normalize_food_name(food_name)
     if client is None:
         client = OpenAIClient()
 
-    label = client.classify_food_diet(norm)
-    if label not in {DietLabel.VEGAN, DietLabel.VEGETARIAN, DietLabel.OMNIVORE}:
+    raw_label = client.classify_food_diet(norm)
+    # Normalize label
+    label_norm = (raw_label or "").strip().lower()
+
+    allowed = {DietLabel.VEGAN, DietLabel.VEGETARIAN, DietLabel.OMNIVORE}
+    if label_norm not in allowed:
+        log.warning("catalog.llm_unmapped_label", food=norm, got=raw_label)
         return None
 
-    obj, _ = FoodCatalog.objects.update_or_create(
+    obj, created = FoodCatalog.objects.update_or_create(
         food_name=norm,
-        defaults={"diet": label, "source": "llm", "confidence": None}
+        defaults={"diet": label_norm, "source": "llm", "confidence": None},
     )
 
-    log.info("catalog.llm_cached", food=norm, diet=label, cost_usd=round(client.cost_usd(), 6))
+    log.info("catalog.llm_cached", food=norm, diet=label_norm, created=created, cost_usd=round(client.cost_usd(), 6))
     return obj

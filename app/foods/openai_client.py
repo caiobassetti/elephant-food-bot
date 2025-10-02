@@ -47,13 +47,33 @@ class OpenAIClient:
         return (self.input_tokens / 1000.0) * PRICE_PER_1K_INPUT + \
                (self.output_tokens / 1000.0) * PRICE_PER_1K_OUTPUT
 
-    @staticmethod # To bypass `self.`
-    # Parse top-3 food list
+    @staticmethod
+    def _strip_markdown_fences(s: str) -> str:
+        s = s.strip()
+        s = re.sub(r"^\s*```(?:json|JSON)?\s*", "", s, flags=re.IGNORECASE)
+        s = re.sub(r"\s*```\s*$", "", s)
+        return s.strip()
+
+    @staticmethod
+    def _extract_first_json_array(s: str):
+        m = re.search(r"\[\s*.*?\s*\]", s, flags=re.DOTALL)
+        if not m:
+            return None
+        try:
+            data = json.loads(m.group(0))
+            return data
+        except Exception:
+            return None
+
+    @staticmethod
     def _parse_three_foods(text):
         s = (text or "").strip()
-        # Try json
+        # Strip markdown fences if present
+        s1 = OpenAIClient._strip_markdown_fences(s)
+
+        # Try JSON parse
         try:
-            data = json.loads(s)
+            data = json.loads(s1)
             if isinstance(data, list):
                 items = [str(x).strip() for x in data if str(x).strip()]
                 if len(items) == 3:
@@ -61,23 +81,35 @@ class OpenAIClient:
         except Exception:
             pass
 
-        # Try comma-separated
-        parts = [p.strip() for p in re.split(r"[,\n;]", s) if p.strip()]
-        if len(parts) == 3:
-            return parts
+        # Try extracting the first JSON array anywhere in the text
+        data = OpenAIClient._extract_first_json_array(s1)
+        if isinstance(data, list) and len(data) == 3:
+            items = [str(x).strip() for x in data if str(x).strip()]
+            if len(items) == 3:
+                return items
 
+        # Try to recover quoted strings
+        quoted = re.findall(r'"([^"]+)"', s1)
+        quoted = [q.strip() for q in quoted if q.strip()]
+        if len(quoted) == 3:
+            return quoted
+
+        # Try to split on commas/newlines/semicolons/brackets
+        parts = [p.strip() for p in re.split(r"[,\n;]", s1) if p.strip()]
+        # Remove common wrappers from each part
+        cleaned = [re.sub(r"^[\[\]`*\-•\s]+|[\[\]`*\-•\s]+$", "", p) for p in parts]
+        cleaned = [c for c in cleaned if c]
+        if len(cleaned) == 3:
+            return cleaned
         raise ValueError(f"Expected exactly 3 foods; got: {s[:120]}")
-
 
     # Send prompt and expect 3 foods back
     def ask_top_three_favorite_foods(self, composed_prompt):
         self._consume_budget("ask_top_three_favorite_foods")
 
         system = (
-            "You are a concise assistant. "
-            "Return exactly three food names, short strings. "
-            "Prefer single dishes or items. "
-            "Format the answer as a JSON array of three strings."
+            "Return exactly three food names as a JSON array of three short strings. "
+            "No explanations, no markdown fences."
         )
         try:
             start = time.time()
@@ -87,7 +119,11 @@ class OpenAIClient:
                     {"role": "system", "content": system},
                     {"role": "user", "content": composed_prompt},
                 ],
-                temperature=0.2,
+                temperature=0.9,
+                # Nudge away from defaults
+                presence_penalty=0.3,
+                # Discouragement of repetition
+                frequency_penalty=0.1,
             )
             ms = int((time.time() - start) * 1000)
             text = (resp.choices[0].message.content or "").strip()
@@ -101,10 +137,11 @@ class OpenAIClient:
             log.info("llm.top3", result=foods, ms=ms)
             return foods
         except Exception as e:
-            log.warning("llm.error.top3", error=str(e))
+            # Include a snippet of the model text for debugging
+            snippet = (text or "")[:160]
+            log.warning("llm.error.top3", error=str(e), raw_snippet=snippet)
             raise
 
-    # Classify a single food into VEGAN / VEGETARIAN / OMNIVORE
     def classify_food_diet(self, food_name):
         self._consume_budget("classify_food_diet")
 

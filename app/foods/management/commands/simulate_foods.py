@@ -1,4 +1,5 @@
 import uuid
+import os
 
 import structlog
 from django.core.management.base import BaseCommand
@@ -22,6 +23,22 @@ from foods.openai_client import (
 
 log = structlog.get_logger(__name__)
 
+# Small, fixed cuisine buckets to nudge variety with minimal tokens
+CUISINE_BUCKETS = [
+    "Middle Eastern",
+    "Sub-Saharan African",
+    "Southeast Asian",
+    "South Asian (non-Indian diaspora classics)",
+    "Eastern European",
+    "Mediterranean (non-Italian)",
+    "Latin American (non-Mexican staples)",
+    "East Asian (non-Japanese)",
+    "Oceania / Pacific",
+    "Regional North American (not burgers or pizza)",
+]
+
+BUCKET_HINT = os.getenv("EFB_TOP3_BUCKET_HINT", "1") not in {"0", "false", "no"}
+
 
 class Command(BaseCommand):
     help = "Simulate favorite-food conversations, persist users, conversations, favorites, and derived diets."
@@ -41,26 +58,47 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.MIGRATE_HEADING(f"simulate_foods: runs={runs} run_id={run_uuid}"))
 
+        # Track previously seen trios to nudge variety
+        seen_trios = set()
+        seen_foods = set()
+
         for i in range(runs):
             with transaction.atomic():
                 # Create user with UNKNOWN diet initially
                 user = UserProfile.objects.create(diet=DietLabel.UNKNOWN, run_id=run_uuid)
 
-                # Compose prompt (base + seed)
-                seed_text = f"seed:{i}"
-                prompt = '''What is your top-3 favorite foods?
-                Return exactly three different general foods (not brand names),
-                separated by a comma and a space.
-                Output only the three food names, no numbers, no explanations,
-                no quotes, and no extra text.'''
-                composed_prompt = prompt + seed_text
+                bucket = CUISINE_BUCKETS[i % len(CUISINE_BUCKETS)] if BUCKET_HINT else None
+
+                seed_text = f"(seed:{run_uuid}-{i})"
+                base_prompt = (
+                    "Give your top-3 favorite foods.\n"
+                    "Return exactly three short food names (no brands), as a JSON array of three strings.\n"
+                    "Prefer items typical of a single cuisine or region so the three feel coherent."
+                )
+                guardrails = (
+                    "Avoid globally popular defaults unless they truly fit the chosen cuisine: "
+                    "pizza, sushi, tacos, burger, pasta."
+                )
+                bucket_line = f"Use the perspective of {bucket} cuisine." if bucket else ""
+                composed_prompt = f"{base_prompt}\n{bucket_line}\n{guardrails}\n{seed_text}"
 
                 # Track client token counters before top-3 call
                 a_in_before = int(getattr(client, "input_tokens", 0) or 0)
                 a_out_before = int(getattr(client, "output_tokens", 0) or 0)
 
-                # OpenAI call to ask for three foods
                 foods = client.ask_top_three_favorite_foods(composed_prompt)
+
+                trio_key = tuple(sorted([normalize_food_name(x) for x in foods]))
+                if trio_key in seen_trios:
+                    log.info("top3.duplicate_detected", foods=foods)
+                    # Retry with fixed avoid set
+                    avoid_line = "\nAvoid repeating: pizza, sushi, tacos, burger, pasta."
+                    foods = client.ask_top_three_favorite_foods(composed_prompt + avoid_line)
+                    trio_key = tuple(sorted([normalize_food_name(x) for x in foods]))
+                    log.info("top3.retry_unique", foods=foods)
+
+                seen_trios.add(trio_key)
+                seen_foods.update([normalize_food_name(x) for x in foods])
 
                 # Client token counters after top-3 call
                 a_in_after = int(getattr(client, "input_tokens", 0) or 0)
