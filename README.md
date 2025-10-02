@@ -46,7 +46,10 @@ cp .env.example .env
 
 ### 7. Optionally, you can hit the API using Token Auth
 `make token U=<username>`
+  - Generate token
 `curl -s -i -H "Authorization: Token <TOKEN>" http://localhost:8000/api/veg-users/`
+  - API call using the generated token as authentication method
+
 
 ## API
 
