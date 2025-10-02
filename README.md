@@ -11,28 +11,7 @@ A Dockerized Django service that simulates 100 “A asks → B answers top-3 foo
 
 
 ## Architecture
-
-```mermaid
-flowchart LR
-  Dev["Dev / CI"]
-  Web["Web (Django + DRF)"]
-  DB["(Postgres)"]
-  Cmd["manage.py simulate_foods"]
-  Client["Client (curl / browser)"]
-
-  Dev -->|docker compose up| Web
-  %% invisible alignment edge
-  Dev -.-> Web
-  Cmd -->|generate & persist| Web
-  Client -->|HTTP GET /api/veg-users/| Web
-  Web -->|ORM / SQL| DB
-
-  subgraph Auth
-    Client -->|Basic| Web
-    Client -->|Token| Web
-  end
-```
-
+![Architecture](docs/architecture.svg)
 
 ## Quickstart
 
