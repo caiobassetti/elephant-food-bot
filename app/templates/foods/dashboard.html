@@ -1,55 +1,358 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Elephants Food Bot Dashboard</title>
-    {% if request.GET.refresh %}
-    <meta http-equiv="refresh" content="3">
-    {% endif %}
+  <meta charset="utf-8">
+  <title>Elephants Food Bot — Dashboard</title>
+  {% if request.GET.refresh %}
+  <meta http-equiv="refresh" content="3">
+  {% endif %}
+  <style>
+    /* EITR theme */
+    :root{
+      --color-bg: #ffffff;
+      --color-ink: #0c2548;
+      --color-body: #0f172a;
+      --color-muted: #6b7280;
+      --color-accent: #e91e63;
+      --color-border: #e5e7eb;
+      --radius: 16px;
+    }
+
+    :root{
+      --font-ui: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
+    }
+
+    /* Base */
+    *{
+      box-sizing:border-box;
+    }
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--color-bg);
+      color:var(--color-body);
+      font-family:var(--font-ui);
+    }
+    .page{
+      max-width:1200px;
+      margin:2.5rem auto;
+      padding:0 1.25rem;
+    }
+    .header{
+      display:grid;
+      grid-template-columns: auto 1fr;
+      align-items:center;
+      gap:1rem;
+      margin-bottom:2rem;
+    }
+    .brand-logo{
+      height:80px;
+      width:auto;
+    }
+    .titles{
+      display:flex;
+      flex-direction:column;
+      gap:.25rem;
+    }
+    .title{
+      font-weight:900;
+      color:var(--color-ink);
+      letter-spacing:-0.02em;
+      font-size:3.2rem;
+      line-height:1.1;
+    }
+    .subtitle{
+      font-weight:800;
+      color:#e91e63;
+      letter-spacing:-0.01em;
+      font-size:1.6rem;
+      line-height:1.25;
+      margin-top:.15rem;
+    }
+
+    /* Layout */
+    .layout{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:1rem;
+    }
+    .stack{ display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+    .card{
+      border:1px solid var(--color-border);
+      border-radius:var(--radius);
+      background:#fff;
+      padding:1rem 1.25rem;
+      box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    .section-title{
+      margin:0 0 .75rem 0;
+      font-size:1.1rem;
+      font-weight:800;
+      letter-spacing:-0.01em;
+    }
+
+    /* Buttons */
+    .actions{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:.5rem;
+    }
+    .btn{
+      appearance:none;
+      display:inline-block;
+      border:none;
+      background:var(--color-accent);
+      color:#fff;
+      padding:.7rem 1.1rem;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 8px 16px rgba(233,30,99,.18);
+      transition: transform .02s ease, box-shadow .2s ease;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+    }
+    .btn:active{
+      transform: translateY(0);
+    }
+
+    /* Totals */
+    .kpi{
+      font-size:1.1rem;
+      font-weight:800;
+    }
+    .muted{
+      color:var(--color-muted);
+    }
+
+    /* Filters */
+    .filters .row{
+      display:flex;
+      flex-direction:column;
+      gap:.8rem;
+    }
+    .dropdown {
+      border:1px solid var(--color-border);
+      border-radius:12px;
+      background:#fff;
+      padding:.45rem .7rem;
+    }
+    .dropdown summary {
+      list-style: none;
+      cursor: pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font: inherit;
+    }
+    .dropdown summary::-webkit-details-marker {
+      display:none;
+    }
+    .dropdown .caret {
+      margin-left:.6rem;
+      font-size:.8rem;
+      color:var(--color-muted);
+    }
+    .dropdown-panel {
+      margin-top:.6rem;
+      border-top:1px dashed var(--color-border);
+      padding-top:.6rem;
+      max-height: 180px;
+      overflow: auto;
+    }
+    .option {
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      margin:.25rem 0;
+    }
+    .badge {
+      display:inline-block;
+      background:#f3f4f6;
+      color:#111827;
+      border-radius:999px;
+      padding:.15rem .5rem;
+      font-size:.8rem;
+      margin-left:.5rem;
+    }
+
+    /* Chart */
+    .chart-frame{
+      border:1px dashed var(--color-border);
+      border-radius:14px;
+      padding:.75rem;
+      background:linear-gradient(180deg, #fff, #fafafa);
+      display:flex;
+      justify-content:center;
+    }
+    .chart{
+      width:auto;
+      max-width:200px;
+      height:auto;
+    }
+
+    /* Table */
+    .table-wrap{
+      max-height: 420px;
+      overflow:auto;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0; }
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:1;
+      background:#f9fafb;
+      color:#111827;
+      text-align:left;
+      font-weight:700;
+      border-bottom:1px solid var(--color-border);
+      padding:.6rem .7rem;
+    }
+    tbody td{
+      border-bottom:1px solid var(--color-border);
+      padding:.6rem .7rem;
+      vertical-align:top;
+    }
+    code{
+      background:#f3f4f6;
+      padding:.15rem .3rem;
+      border-radius:6px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Elephants Food Bot Dashboard</h1>
-
-    <div>
-        <form action="/ui/simulate" method="get">
-            <button name="count" value="10">Simulate 10</button>
-            <button name="count" value="50">Simulate 50</button>
-            <button name="count" value="100">Simulate 100</button>
-        </form>
+  <div class="page">
+    <div class="header">
+      <img class="brand-logo" src="{% static 'foods/Logo_TransparentBG_BlackText.svg' %}" alt="Elephants in the Room Logo">
+      <div class="titles">
+        <div class="title">Elephants Food Bot</div>
+        <div class="subtitle">Kick off simulations, see diet distribution and track token/cost.</div>
+      </div>
     </div>
 
-    <h2>Totals</h2>
-    <p>Total tokens: {{ totals.total_tokens }} | Total cost: ${{ totals.total_cost }}</p>
+    <div class="layout">
+      <div class="stack">
+        <div class="card">
+          <div class="section-title">Run a simulation</div>
+          <form class="actions" action="/ui/simulate" method="get">
+            <button class="btn" name="count" value="1"  type="submit">Simulate 1</button>
+            <button class="btn" name="count" value="10"  type="submit">Simulate 10</button>
+          </form>
+          {% if request.GET.refresh %}
+            <p class="muted" style="margin-top:.6rem;">Refreshing to capture new rows…</p>
+          {% endif %}
+        </div>
 
-    <h2>Filters</h2>
-    <form method="get">
-        Run ID: <input type="text" name="run_id" value="{{ filter_run_id }}">
-        Diet: <input type="text" name="diet" value="{{ filter_diet }}">
-        <button type="submit">Apply</button>
-    </form>
+        <div class="card">
+          <div class="section-title">Totals</div>
+          <div class="kpi">Total tokens: {{ totals.total_tokens }}</div>
+          <div class="kpi">Total cost: ${{ totals.total_cost }}</div>
+        </div>
 
-    <h2>Diet Breakdown</h2>
-    <img src="/ui/diets.png?run_id={{ filter_run_id }}&diet={{ filter_diet }}" alt="Diet chart">
+        <div class="card">
+          <div class="section-title">Filters</div>
+          <div class="hint">Choose values and Apply. Leave empty to show all.</div>
+          <form class="filters" method="get" action="/ui/">
+            <div class="row">
+              <details class="dropdown">
+                <summary>
+                  <span>Run ID</span>
+                  {% if selected_run_ids and selected_run_ids|length > 0 %}
+                    <span class="badge">{{ selected_run_ids|length }} selected</span>
+                  {% endif %}
+                  <span class="caret">▾</span>
+                </summary>
+                <div class="dropdown-panel">
+                  {% for rid in options_run_ids %}
+                    <label class="option">
+                      <input type="checkbox" name="run_id" value="{{ rid }}" {% if rid in selected_run_ids %}checked{% endif %}>
+                      <code>{{ rid }}</code>
+                    </label>
+                  {% endfor %}
+                </div>
+              </details>
 
-    <h2>Results</h2>
-    <table border="1">
-        <tr>
-            <th>Run ID</th>
-            <th>User</th>
-            <th>Diet</th>
-            <th>Foods</th>
-            <th>Tokens</th>
-            <th>Cost</th>
-        </tr>
-        {% for r in rows %}
-        <tr>
-            <td>{{ r.run_id }}</td>
-            <td>{{ r.user_id }}</td>
-            <td>{{ r.diet }}</td>
-            <td>{{ r.foods|join:", " }}</td>
-            <td>{{ r.tokens }}</td>
-            <td>{{ r.cost }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+              <details class="dropdown">
+                <summary>
+                  <span>Diet</span>
+                  {% if selected_diets and selected_diets|length > 0 %}
+                    <span class="badge">{{ selected_diets|length }} selected</span>
+                  {% endif %}
+                  <span class="caret">▾</span>
+                </summary>
+                <div class="dropdown-panel">
+                  {% for d in options_diets %}
+                    <label class="option">
+                      <input type="checkbox" name="diet" value="{{ d }}" {% if d in selected_diets %}checked{% endif %}>
+                      <span>{{ d }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </details>
+            </div>
+
+            <div style="margin-top:.6rem;">
+              <button class="btn" type="submit">Apply</button>
+              <a href="/ui/" class="muted" style="margin-left:.6rem; text-decoration:none;">Clear</a>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="section-title">Diet breakdown</div>
+          <div class="chart-frame">
+            <img
+              class="chart"
+              src="/ui/diets.png{% if selected_run_ids or selected_diets %}?{% endif %}{% for rid in selected_run_ids %}{% if not forloop.first %}&{% endif %}run_id={{ rid }}{% endfor %}{% if selected_diets %}{% if selected_run_ids %}&{% endif %}{% for d in selected_diets %}{% if not forloop.first %}&{% endif %}diet={{ d }}{% endfor %}{% endif %}"
+              alt="Diet chart">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Results</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>User</th>
+                  <th>Diet</th>
+                  <th>Foods (top-3)</th>
+                  <th>Tokens</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in rows %}
+                <tr>
+                  <td><code>{{ r.run_id }}</code></td>
+                  <td><code>{{ r.user_id }}</code></td>
+                  <td>{{ r.diet }}</td>
+                  <td>{{ r.foods|join:", " }}</td>
+                  <td>{{ r.tokens|default:"" }}</td>
+                  <td>{{ r.cost|default:"" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="muted">No rows yet. Run a simulation to populate data.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

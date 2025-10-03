@@ -6,6 +6,12 @@ from common.logging import configure_logging
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-not-secret")
 DEBUG = False
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")

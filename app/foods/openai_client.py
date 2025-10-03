@@ -68,9 +68,8 @@ class OpenAIClient:
     @staticmethod
     def _parse_three_foods(text):
         s = (text or "").strip()
-        # Strip markdown fences if present
+        # Strip markdown fences
         s1 = OpenAIClient._strip_markdown_fences(s)
-
         # Try JSON parse
         try:
             data = json.loads(s1)
@@ -81,7 +80,7 @@ class OpenAIClient:
         except Exception:
             pass
 
-        # Try extracting the first JSON array anywhere in the text
+        # Try extracting JSON array anywhere in text
         data = OpenAIClient._extract_first_json_array(s1)
         if isinstance(data, list) and len(data) == 3:
             items = [str(x).strip() for x in data if str(x).strip()]
@@ -96,6 +95,7 @@ class OpenAIClient:
 
         # Try to split on commas/newlines/semicolons/brackets
         parts = [p.strip() for p in re.split(r"[,\n;]", s1) if p.strip()]
+
         # Remove common wrappers from each part
         cleaned = [re.sub(r"^[\[\]`*\-•\s]+|[\[\]`*\-•\s]+$", "", p) for p in parts]
         cleaned = [c for c in cleaned if c]

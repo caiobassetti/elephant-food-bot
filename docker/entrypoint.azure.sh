@@ -65,10 +65,10 @@ else:
         print(f"EFB_BOOTSTRAP: superuser '{u}' created.", flush=True)
 PY
 
-  # Create/print DRF token for that user (if username provided)
+  # Create/print DRF token for that user
   if [[ -n "${DJANGO_SUPERUSER_USERNAME:-}" ]]; then
     echo "EFB_BOOTSTRAP: creating DRF token for ${DJANGO_SUPERUSER_USERNAME}..." >&2
-    # drf_create_token prints the token; tee saves a copy under /home
+    # drf_create_token prints the token
     python /app/app/manage.py drf_create_token "$DJANGO_SUPERUSER_USERNAME" | tee /home/first_token.txt || true
   fi
 

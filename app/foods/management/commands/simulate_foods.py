@@ -18,16 +18,16 @@ from foods.openai_client import (
 
 log = structlog.get_logger(__name__)
 
-# Small, fixed cuisine buckets to nudge variety with minimal tokens
+# Fixed cuisine buckets to nudge variety
 CUISINE_BUCKETS = [
     "Middle Eastern",
-    "Sub-Saharan African",
+    "African",
     "Southeast Asian",
-    "South Asian (non-Indian diaspora classics)",
+    "South Asian (non-Indian staples)",
     "Eastern European",
-    "Mediterranean (non-Italian)",
+    "Mediterranean (non-Italian staples)",
     "Latin American (non-Mexican staples)",
-    "East Asian (non-Japanese)",
+    "East Asian (non-Japanese staples)",
     "Oceania / Pacific",
     "Regional North American (not burgers or pizza)",
 ]
