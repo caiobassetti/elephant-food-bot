@@ -1,5 +1,4 @@
 import io
-from decimal import Decimal
 
 import matplotlib
 matplotlib.use("Agg")
@@ -9,7 +8,6 @@ from django.shortcuts import render, redirect
 from django.core.management import call_command
 from django.db.models import Count, Sum
 from django.http import HttpResponse
-import matplotlib.pyplot as plt
 
 from .models import UserProfile, Conversation
 
