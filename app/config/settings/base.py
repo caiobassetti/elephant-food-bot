@@ -83,7 +83,6 @@ else:
         }
     }
 
-STATIC_URL = "static/"
 STATIC_ROOT = Path(__file__).resolve().parents[2] / "staticfiles"
 
 REST_FRAMEWORK = {

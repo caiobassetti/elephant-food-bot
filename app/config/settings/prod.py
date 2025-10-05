@@ -3,8 +3,6 @@ import os
 
 from .base import *
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 # Security headers

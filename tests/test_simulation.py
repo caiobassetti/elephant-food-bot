@@ -1,4 +1,3 @@
-
 import pytest
 from django.core.management import call_command
 from foods.models import (
@@ -15,13 +14,16 @@ pytestmark = pytest.mark.django_db
 # Ensure at least three rows exist so simulate_foods check passes
 def _seed_catalog_minimum():
     FoodCatalog.objects.update_or_create(
-        food_name="banana", defaults={"diet": DietLabel.VEGAN, "source": "static"}
+        food_name="banana",
+        defaults={"diet": DietLabel.VEGAN, "source": "static"}
     )
     FoodCatalog.objects.update_or_create(
-        food_name="avocado toast", defaults={"diet": DietLabel.VEGAN, "source": "static"}
+        food_name="avocado toast",
+        defaults={"diet": DietLabel.VEGAN, "source": "static"}
     )
     FoodCatalog.objects.update_or_create(
-        food_name="hummus", defaults={"diet": DietLabel.VEGAN, "source": "static"}
+        food_name="hummus",
+        defaults={"diet": DietLabel.VEGAN, "source": "static"}
     )
 
 # Smoke test: command runs, creates conversations, and does not hit real OpenAI

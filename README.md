@@ -27,8 +27,9 @@ cp .env.example .env
 
 - Edit `.env` and set:
 ```
-OPENAI_API_KEY=sk-... # required for live simulation
-EFB_LLM_CALL_BUDGET=20  # max number of OpenAI calls per run
+OPENAI_API_KEY=sk-... # Required for live simulation
+EFB_LLM_CALL_BUDGET=20  # Max number of OpenAI calls per run
+EFB_DRY_RUN=1 # Skip all OpenAI calls and use random foods from the catalog (no token cost)
 ```
 
 ### 2. Start services
@@ -87,6 +88,7 @@ GET `/api/veg-users/`
 
 - **App**: http://localhost:8000
 - **Admin**: http://localhost:8000/admin/
+- **Dashboard**: http://localhost:8000/ui/
 - **Postgres**: localhost:5432 (inside Docker network at `db:5432`)
     - DB name: efb
     - DB user:efb_user

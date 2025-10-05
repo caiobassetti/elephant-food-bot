@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 if trio_key in seen_trios:
                     log.info("top3.duplicate_detected", foods=foods)
                     # Retry with fixed avoid set
-                    avoid_line = "\nAvoid repeating: pizza, sushi, tacos, burger, pasta."
+                    avoid_line = f"\nAvoid repeating {seen_trios}."
                     foods = client.ask_top_three_favorite_foods(composed_prompt + avoid_line)
                     trio_key = tuple(sorted([normalize_food_name(x) for x in foods]))
                     log.info("top3.retry_unique", foods=foods)

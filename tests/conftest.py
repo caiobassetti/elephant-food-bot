@@ -1,36 +1,25 @@
-# PATH settings
+# PATH import
 import os
 import sys
 from pathlib import Path
 
-# Find repo root (folder containing /tests/)
-THIS_FILE = Path(__file__).resolve()
-REPO_ROOT = THIS_FILE.parents[1]
 
-# Find the Django app dir
-DJANGO_APP_DIR = None
-for mp in REPO_ROOT.rglob("manage.py"):
-    candidate = mp.parent
-    if (candidate / "config").is_dir():
-        DJANGO_APP_DIR = candidate
-        break
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
-if DJANGO_APP_DIR is None:
-    for cfg in REPO_ROOT.rglob("config/__init__.py"):
-        DJANGO_APP_DIR = cfg.parent.parent
-        break
+DJANGO_APP_DIR = REPO_ROOT / "app"
+MANAGE_PATH = DJANGO_APP_DIR / "manage.py"
 
-if DJANGO_APP_DIR is None:
+# Structure check
+if not MANAGE_PATH.is_file() or not (DJANGO_APP_DIR / "config").is_dir():
     raise RuntimeError(
-        "Could not locate Django app directory. "
-        "Expected to find 'manage.py' and a 'config/' package somewhere under the repo."
+        "Expected Django app at 'app/' with 'manage.py' and 'config/' package."
     )
 
 # Put the Django app dir at the front of sys.path so 'import config' works
 sys.path.insert(0, str(DJANGO_APP_DIR))
 
-# Ensure DJANGO_SETTINGS_MODULE is set
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
+
 
 import uuid
 from contextlib import contextmanager
@@ -41,12 +30,14 @@ from django.db import connections, models
 from django.test import Client
 from django.utils import timezone
 
+# some tests don't require API client
 try:
     from rest_framework.test import APIClient
 except Exception:
     APIClient = None
 
-
+# scope='session' -> runs once for the entire pytest run
+# autouse=True -> runs even if no test explicitly requests it
 @pytest.fixture(scope="session", autouse=True)
 # Override DATABASES to use sqlite DB for tests
 def _force_sqlite_db():
@@ -65,14 +56,15 @@ def _force_sqlite_db():
 
 
 @pytest.fixture
+# Returns either API client or plain django client
 def api_client():
     if APIClient is not None:
         return APIClient()
     return Client()
 
 
+# Generate valid default per field type
 def _default_for_field(field):
-    # Generate valid default per field type
     if isinstance(field,
         models.CharField |
         models.TextField

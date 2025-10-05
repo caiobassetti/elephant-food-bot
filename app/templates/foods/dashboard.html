@@ -197,7 +197,54 @@
       height:auto;
     }
 
-    /* Table */
+
+    /* Chart and Foods */
+    .cards-row.two-up {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .card-chart .chart-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 260px;
+      padding: 8px;
+    }
+    .card-chart img {
+      max-width: 90%;
+      height: auto;
+      display: block;
+    }
+
+    /* Seen Foods table */
+    .seen-table-wrap {
+      max-height: 340px;
+      overflow: auto;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      background: #fff;
+    }
+    .seen-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .seen-table th, .seen-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .seen-table th {
+      font-weight: 700;
+    }
+    .seen-table .muted {
+      color: #7a7a7a;
+    }
+
+    /* Users table */
     .table-wrap{
       max-height: 420px;
       overflow:auto;
@@ -308,14 +355,43 @@
         </div>
       </div>
       <div class="stack">
-        <div class="card">
-          <div class="section-title">Diet breakdown</div>
-          <div class="chart-frame">
-            <img
-              class="chart"
-              src="/ui/diets.png{% if selected_run_ids or selected_diets %}?{% endif %}{% for rid in selected_run_ids %}{% if not forloop.first %}&{% endif %}run_id={{ rid }}{% endfor %}{% if selected_diets %}{% if selected_run_ids %}&{% endif %}{% for d in selected_diets %}{% if not forloop.first %}&{% endif %}diet={{ d }}{% endfor %}{% endif %}"
-              alt="Diet chart">
-          </div>
+        <div class="cards-row two-up">
+          <section class="card card-chart">
+            <h3>Diet breakdown</h3>
+            <div class="chart-box">
+              <img
+                src="/ui/diets.png{% if selected_run_ids or selected_diets %}?{% endif %}{% for r in selected_run_ids %}{% if not forloop.first %}&{% endif %}run_id={{ r }}{% endfor %}{% if selected_diets %}{% if selected_run_ids %}&{% endif %}{% for d in selected_diets %}{% if not forloop.first or selected_run_ids %}&{% endif %}diet={{ d }}{% endfor %}{% endif %}"
+                alt="Diet chart">
+            </div>
+          </section>
+
+          <section class="card card-seen-foods">
+            <h3>Seen Foods</h3>
+            <div class="seen-table-wrap">
+              <table class="table seen-table">
+                <thead>
+                  <tr>
+                    <th>Food Name</th>
+                    <th>Diet</th>
+                    <th>Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if seen_foods %}
+                    {% for item in seen_foods %}
+                      <tr>
+                        <td>{{ item.food_name }}</td>
+                        <td>{{ item.diet }}</td>
+                        <td>{{ item.confidence_display }}</td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr><td colspan="3" class="muted">No foods yet.</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
 
         <div class="card">

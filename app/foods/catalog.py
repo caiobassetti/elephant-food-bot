@@ -106,19 +106,36 @@ def expand_with_llm(food_name, client=None):
     if client is None:
         client = OpenAIClient()
 
-    raw_label = client.classify_food_diet(norm)
+    result = client.classify_food_diet(norm)
+
+    if isinstance(result, tuple):
+        raw_label, confidence = result
+    else:
+        raw_label, confidence = result, None
+
     # Normalize label
     label_norm = (raw_label or "").strip().lower()
-
     allowed = {DietLabel.VEGAN, DietLabel.VEGETARIAN, DietLabel.OMNIVORE}
+
     if label_norm not in allowed:
         log.warning("catalog.llm_unmapped_label", food=norm, got=raw_label)
         return None
 
     obj, created = FoodCatalog.objects.update_or_create(
         food_name=norm,
-        defaults={"diet": label_norm, "source": "llm", "confidence": None},
+        defaults={
+            "diet": label_norm,
+            "source": "llm",
+            "confidence": confidence
+        },
     )
 
-    log.info("catalog.llm_cached", food=norm, diet=label_norm, created=created, cost_usd=round(client.cost_usd(), 6))
+    log.info(
+        "catalog.llm_cached",
+        food=norm,
+        diet=label_norm,
+        confidence=confidence,
+        created=created,
+        cost_usd=round(client.cost_usd(), 6)
+    )
     return obj

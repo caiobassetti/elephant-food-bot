@@ -53,7 +53,7 @@ class UserProfile(models.Model):
         choices=DietLabel.choices,
         default=DietLabel.UNKNOWN
     )
-    run_id = models.UUIDField(null=True, blank=True)  # Batch with 100 runs
+    run_id = models.UUIDField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -74,8 +74,8 @@ class Conversation(models.Model):
     """
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="messages")
     role = models.CharField(max_length=1, choices=MessageRole.choices)
-    prompt = models.TextField(blank=True, default="") # What A asked or the prompt used
-    response = models.TextField(blank=True, default="") # What B answered (empty for A)
+    prompt = models.TextField(blank=True, default="")
+    response = models.TextField(blank=True, default="")
     model = models.CharField(max_length=64, blank=True, default="")
 
     # Token/costs accounting
@@ -89,7 +89,7 @@ class Conversation(models.Model):
         blank=True
     )
 
-    run_id = models.UUIDField(null=True, blank=True)  # UserProfile.run_id for filtering
+    run_id = models.UUIDField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

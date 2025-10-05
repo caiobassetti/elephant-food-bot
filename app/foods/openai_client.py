@@ -5,6 +5,9 @@ import time
 
 import structlog
 
+from .normalize import normalize_food_name
+from django.db.models import F
+
 log = structlog.get_logger(__name__)
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -21,14 +24,17 @@ CALL_BUDGET = None if _CALL_BUDGET_ENV == "" else max(0, int(_CALL_BUDGET_ENV))
 
 class OpenAIClient:
     def __init__(self):
-        if not OPENAI_API_KEY:
-            raise RuntimeError("OPENAI_API_KEY is required for live runs.")
-        try:
-            from openai import OpenAI
-            self._client = OpenAI(api_key=OPENAI_API_KEY)
-        except Exception as e:
-            log.warning("openai_import_failed", error=str(e))
-            raise
+        self._dry_run = os.environ.get("EFB_DRY_RUN") == "1"
+
+        if self._dry_run == 0:
+            if not OPENAI_API_KEY:
+                raise RuntimeError("OPENAI_API_KEY is required for live runs.")
+            try:
+                from openai import OpenAI
+                self._client = OpenAI(api_key=OPENAI_API_KEY)
+            except Exception as e:
+                log.warning("openai_import_failed", error=str(e))
+                raise
 
         self.input_tokens = 0
         self.output_tokens = 0
@@ -48,14 +54,14 @@ class OpenAIClient:
                (self.output_tokens / 1000.0) * PRICE_PER_1K_OUTPUT
 
     @staticmethod
-    def _strip_markdown_fences(s: str) -> str:
+    def _strip_markdown_fences(s):
         s = s.strip()
         s = re.sub(r"^\s*```(?:json|JSON)?\s*", "", s, flags=re.IGNORECASE)
         s = re.sub(r"\s*```\s*$", "", s)
         return s.strip()
 
     @staticmethod
-    def _extract_first_json_array(s: str):
+    def _extract_first_json_array(s):
         m = re.search(r"\[\s*.*?\s*\]", s, flags=re.DOTALL)
         if not m:
             return None
@@ -105,6 +111,17 @@ class OpenAIClient:
 
     # Send prompt and expect 3 foods back
     def ask_top_three_favorite_foods(self, composed_prompt):
+        if self._dry_run:
+            from .models import FoodCatalog
+            foods = (
+                FoodCatalog.objects
+                .order_by("?")
+                .values_list("food_name", flat=True)[:3]
+            )
+            foods = [f for f in foods if f]
+            log.info("openai.call", got=len(foods), result="dry_run", ms=0)
+            return foods
+
         self._consume_budget("ask_top_three_favorite_foods")
 
         system = (
@@ -143,6 +160,28 @@ class OpenAIClient:
             raise
 
     def classify_food_diet(self, food_name):
+        if self._dry_run:
+            from .models import FoodCatalog
+            norm = normalize_food_name(food_name)
+            cat = (
+                FoodCatalog.objects
+                .filter(food_name=norm)
+                .values("diet", "source", "confidence")
+                .first()
+            )
+            if cat:
+                log.info(
+                    "llm.classify",
+                    food=norm,
+                    result=cat["diet"],
+                    confidence=cat["confidence"],
+                    ms=0,
+                    got="catalog",
+                )
+                return cat["diet"], cat["confidence"]
+            log.info("llm.classify", food=food_name, result="unknown", confidence=None, ms=0, got="dry_run-miss")
+            return "unknown", None
+
         self._consume_budget("classify_food_diet")
 
         prompt = (
@@ -150,8 +189,9 @@ class OpenAIClient:
             "- VEGAN: contains no animal products.\n"
             "- VEGETARIAN: may include dairy/eggs, but no meat/fish.\n"
             "- OMNIVORE: includes meat or fish.\n"
-            f"Food: {food_name}\n"
-            "Return ONLY the label: vegan, vegetarian, or omnivore."
+            "Return STRICT JSON with two keys:\n"
+            "{'diet': '<vegan|vegetarian|omnivore>', 'confidence': <float between 0 and 1>}.\n"
+            f"Food: {food_name}"
         )
         try:
             start = time.time()
@@ -168,11 +208,27 @@ class OpenAIClient:
                 self.input_tokens += int(getattr(usage, "prompt_tokens", 0) or 0)
                 self.output_tokens += int(getattr(usage, "completion_tokens", 0) or 0)
 
-            if text in {"VEGAN", "VEGETARIAN", "OMNIVORE"}:
-                log.info("llm.classify", food=food_name, result=text, ms=ms)
-                return text
+            try:
+                data = json.loads(text)
+                diet = str(data.get("diet", "")).lower()
+                confidence = float(data.get("confidence", 0.0))
+            except Exception:
+                diet = text.strip().lower()
+                confidence = None
+
+            if diet in {"vegan", "vegetarian", "omnivore"}:
+                log.info(
+                    "llm.classify",
+                    food=food_name,
+                    result=diet,
+                    confidence=confidence,
+                    ms=ms,
+                )
+                return diet, confidence
+
             log.warning("llm.unexpected_label", got=text)
-            return None
+            return None, None
+
         except Exception as e:
             log.warning("llm.error.classify", error=str(e))
             return None

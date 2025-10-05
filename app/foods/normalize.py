@@ -11,10 +11,8 @@ _COMMON_TYPO_FIXES = {
 _MULTI_SPACE = re.compile(r"\s+")
 _NON_WORD_EDGES = re.compile(r"^[^a-z0-9]+|[^a-z0-9]+$", re.IGNORECASE)
 
+# Normalize with lowercase, strip, collapse spaces, typo fixes.
 def normalize_food_name(name):
-    """
-    Normalize with lowercase, strip, collapse spaces, typo fixes.
-    """
     original = name or ""
     s = original.strip().lower()
     s = _NON_WORD_EDGES.sub("", s)
