@@ -6,7 +6,6 @@ import time
 import structlog
 
 from .normalize import normalize_food_name
-from django.db.models import F
 
 log = structlog.get_logger(__name__)
 
