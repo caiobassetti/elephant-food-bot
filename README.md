@@ -275,11 +275,12 @@ A Django-rendered dashboard is available at:
 
 ### Features:
 
-- **Run a simulation**: buttons to simulate 1, 10, or 100 conversations.
+- **Run a simulation**: buttons to simulate 1 or 10 conversations.
   - The run completes first, then the page reloads once with the new data.
 - **Totals**: total tokens and total cost.
 - **Filters**: multi-select dropdowns for Run ID and Diet.
 - **Diet breakdown**: a live pie chart.
+- **Seen Foods**: shows all the foods seen in user interactions, and their classification.
 - **Results table**: shows run_id, user, diet, top-3 foods, tokens, and cost.
 
 The dashboard uses only Python/Django + matplotlib.
@@ -291,23 +292,23 @@ The dashboard uses only Python/Django + matplotlib.
 ├─ app/                        # Django app
 │  ├─ common/                  # Helpers package common to all domains
 │  ├─ config/                  # Django project settings split (base/dev/prod)
-│  ├─ seeds/
-│  │  └─ food_catalog.csv
+│  ├─ seeds/food_catalog.csv
 │  ├─ foods/
 │  │  ├─ management/commands/simulate_foods.py
-│  │  ├─ urls_ops.py           # Route to trigger tasks
-│  │  ├─ views_ops.py          # POST /ops/run-sim/ to trigger simulations
-│  │  ├─ urls_ui.py            # Routes for the dashboard (/ui/)
-│  │  ├─ views_ui.py           # Dashboard views (HTML + chart + simulate)
-│  │  ├─ catalog.py
-│  │  ├─ openai_client.py
-│  │  └─ … models.py, serializers.py, views.py, urls.py
+│  │  ├─ catalog.py            # Loads seed catalog
+│  │  ├─ diet.py               # User's diet classification logic
+│  │  ├─ models.py             # UserProfile, FoodCatalog, Conversation and FavoriteFood models
+│  │  ├─ normalize.py          # Helper for food name normalization
+│  │  ├─ openai_client.py      # OpenAi client for generating Conversations and food classification
+│  │  ├─ serializers.py        # Serializer for veg-users view
+│  │  ├─ urls.py               # UI, ops and veg-users path
+│  │  └─ views.py              # UI, ops and veg-users views
 │  └─ templates/foods/dashboard.html
-├─ docker/                     # Build for the web service
+├─ docker/
 │  ├─ entrypoint.sh            # local/dev entrypoint
 │  ├─ entrypoint.azure.sh      # Azure entrypoint (migrate + bootstrap + gunicorn)
 │  ├─ web.Dockerfile           # local/dev image
-│  └─ web.azure.Dockerfile     # production image (gunicorn + whitenoise + collects static)
+│  └─ web.azure.Dockerfile     # Production image (gunicorn + whitenoise + collects static)
 ├─ tests/                      # pytest suite for API, simulation, utils
 ├─ .env.example                # Sample env vars
 ├─ compose.yaml                # Local runtime (db + web)
